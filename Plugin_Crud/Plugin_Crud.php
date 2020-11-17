@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 * Plugin Name: Plugin_Crud
 * Plugin URI: https://sp.senac.br
@@ -25,13 +25,66 @@ the name of this hook will be ‘activate_sample.php’.
 */
 register_activation_hook(__FILE__, 'criar_tabela');
 
-function criar_tabela () {
-    
+function criar_tabela()
+{
+
     // Classe de PDO do WordPress
     global $wpdb;
     // O prefixo de criação de tabela 
-$wpdb->query("CREATE TABLE {$wpdb->prefix}agenda (
+    $wpdb->query("CREATE TABLE {$wpdb->prefix}agenda (
                            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
                            nome VARCHAR(255) NOT NULL,
                            whatsapp BIGINT UNSIGNED NOT NULL)");
+}
+
+register_deactivation_hook(__FILE__, 'apagar_tabela');
+
+function apagar_tabela()
+{
+    // Classe de PDO do WordPress
+    global $wpdb;
+    // O prefixo de criação de tabela 
+    $wpdb->query("DROP TABLE {$wpdb->prefix}agenda");
+}
+
+add_action('admin_menu','crud_do_meu_plugin');
+
+function crud_do_meu_plugin() {
+
+    //Plugin-In no PRIMEIRO nível do menu
+    add_menu_page('Configurações do meu Plug-In', // Título da página de configuração do Plug-in
+                  'Meu Plug-in', // Título do plug-in no menu
+                  'administrator', // Quem pode acessar esse menu
+                  'meu-plugin-config', // Qual vai ser o nome do menu enquanto elemento
+                  'menu_configuracoes', // Qual função será executada na página do Plug-in
+                  'dashicons-buddicons-activity' // O ícone do plug-in
+                );
+            }
+
+function menu_configuracoes() {
+
+    global $wpdb;
+
+    if (isset($_POST['submit'])) {
+        
+        if ($_POST['submit'] == 'Gravar') {
+
+            $wpdb->query(
+                $wpdb->prepare("INSERT INTO {$wpdb->prefix}agenda 
+                                            (nome, whatsapp) 
+                                       VALUES 
+                                            (%s, %d)", $_POST['nome'], $_POST['whatsapp']));
+        }
+    
+    }
+
+    if (isset($_GET['apagar'])) {
+        $wpdb->query(
+            $wpdb->prepare("DELETE FROM {$wpdb->prefix}agenda WHERE id = (%d)", $_GET['apagar']));
+    }
+
+
+    $contatos = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}agenda");
+
+    require 'lista_TPL.php';
 }
