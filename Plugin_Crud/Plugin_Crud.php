@@ -47,40 +47,70 @@ function apagar_tabela()
     $wpdb->query("DROP TABLE {$wpdb->prefix}agenda");
 }
 
-add_action('admin_menu','crud_do_meu_plugin');
+add_action('admin_menu', 'crud_do_meu_plugin');
 
-function crud_do_meu_plugin() {
+function crud_do_meu_plugin()
+{
 
     //Plugin-In no PRIMEIRO nível do menu
-    add_menu_page('Configurações do meu Plug-In', // Título da página de configuração do Plug-in
-                  'Meu Plug-in', // Título do plug-in no menu
-                  'administrator', // Quem pode acessar esse menu
-                  'meu-plugin-config', // Qual vai ser o nome do menu enquanto elemento
-                  'menu_configuracoes', // Qual função será executada na página do Plug-in
-                  'dashicons-buddicons-activity' // O ícone do plug-in
-                );
-            }
+    add_menu_page(
+        'Configurações do meu Plug-In', // Título da página de configuração do Plug-in
+        'Meu Plug-in', // Título do plug-in no menu
+        'administrator', // Quem pode acessar esse menu
+        'meu-plugin-config', // Qual vai ser o nome do menu enquanto elemento
+        'menu_configuracoes', // Qual função será executada na página do Plug-in
+        'dashicons-buddicons-activity' // O ícone do plug-in
+    );
+}
 
-function menu_configuracoes() {
+function menu_configuracoes()
+{
 
     global $wpdb;
 
     if (isset($_POST['submit'])) {
-        
+
         if ($_POST['submit'] == 'Gravar') {
 
             $wpdb->query(
                 $wpdb->prepare("INSERT INTO {$wpdb->prefix}agenda 
                                             (nome, whatsapp) 
                                        VALUES 
-                                            (%s, %d)", $_POST['nome'], $_POST['whatsapp']));
+                                            (%s, %d)", $_POST['nome'], $_POST['whatsapp'])
+            );
         }
-    
     }
 
     if (isset($_GET['apagar'])) {
         $wpdb->query(
-            $wpdb->prepare("DELETE FROM {$wpdb->prefix}agenda WHERE id = (%d)", $_GET['apagar']));
+            $wpdb->prepare("DELETE FROM {$wpdb->prefix}agenda WHERE id = (%d)", $_GET['apagar'])
+        );
+    }
+
+    if (isset($_GET['editar_form']) && !isset($_POST['alterar'])) {
+
+        //Recuperar dados
+        $id = preg_replace('/\D/', '', $_GET['editar_form']);
+
+        $contatoEdit = $wpdb->get_results("SELECT nome, whatsapp 
+                              FROM {$wpdb->prefix}agenda 
+                              WHERE id = $id");
+
+        require 'form_editar_TPL.php';
+        exit();
+    }
+
+    if (isset($_POST['alterar'])) {
+
+        $wpdb->query($wpdb->prepare(
+            "             UPDATE  {$wpdb->prefix}agenda
+                        SET nome = %s, whatsapp = %d
+                        WHERE id = %d
+          ",
+            $_POST['nome'],
+            $_POST['whatsapp'],
+            $_POST['id']
+        ));
     }
 
 

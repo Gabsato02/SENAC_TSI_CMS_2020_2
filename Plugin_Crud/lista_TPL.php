@@ -9,7 +9,7 @@
             <tr>
                 <td>Nome</td>
                 <td>Whatsapp</td>
-                <td>Gerenciar</td>
+                <td colspan='2'>Gerenciar</td>
             </tr>
 
             <?php
@@ -19,6 +19,8 @@
                             <td>{$value->nome}</td>
                             <td>{$value->whatsapp}</td>
                             <td><a href='admin.php?page={$_GET['page']}&apagar={$value->id}'>Apagar</a></td>
+                            <td><a href='admin.php?page={$_GET['page']}&editar_form={$value->id}'>Editar</a></td>
+                            
                           </tr>";
                 }
             } else {
@@ -30,6 +32,7 @@
             <tr>
                 <td><input type='text' name='nome'></td>
                 <td><input type='text' name='whatsapp'></td>
+                <td></td>
                 <td style='display: flex; justify-content: center;'><?php submit_button('Gravar'); ?></td>
             </tr>
 
